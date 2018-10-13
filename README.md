@@ -1,5 +1,8 @@
 # Tong-Public 
 
+### Description
+This is a R based model that helps to predict GDP. This is also a group project. Emma Weber and I finished this project together in 2017. 
+
 ### Project Background
 After the world war II, some countries recovered quickly and gradually became development countries. However, there are still many developing countries today. We want to analyze the data and build a solid model to find which variables are correlated to boost the economy. We pick GDP, the most representative variable in the economy, as our Y variable. We assume that GDP are correlated to the natural resources, infrastructure, population and technology.  As a result, we pick agriculture, export, foreign investment, imports, industry, inflation rate, population, debt, fertility rate and computer as our x variables to start with. 
 
@@ -16,5 +19,9 @@ Because we are building several models here, we have Type I error. So we will de
 ### Conclusion
 Our final model is log(GDP)=7.96+0.27*(log(debt))+0.62*(log(population))-0.037*(agriculture). Almost 82% of the data points can be explained by this model. 
 If we go back to our hypothesis, log(GDP) is correlated with log(debt), log(population), and agriculture. 
+
+### Reference
+The data set comes from the book Practicing Statistics Guided Investigations for 2th, Shonda Kuiper and Jeff Sklar, Jan 6, 2012.
+
 
 
