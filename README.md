@@ -2,7 +2,6 @@
 
 ### Description
 This is a R based model that helps to predict GDP. To run this model, you can choose either the downloaded version of R studio or webiste version of R. Make sure to download the dataset before running the model. 
-
 Here is the link to download R:                        https://www.rstudio.com/.  
 Here is the link to download data set:                 https://github.com/Tongasdfg/Tong-Public/blob/master/C3%20Worldbank.csv 
 Here is the link to download variable reference table: https://github.com/Tongasdfg/Tong-Public/blob/master/C3%20Worldbank-variable%20names.csv 
