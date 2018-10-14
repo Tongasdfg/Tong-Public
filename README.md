@@ -1,4 +1,4 @@
-# Tong-Public 
+# Data Analytics in GDP Prediction   
 
 ### Description
 This is a R based model that helps to predict GDP. This is also a group project. Emma Weber and I finished this project together in 2017. 
