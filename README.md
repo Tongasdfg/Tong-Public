@@ -2,9 +2,11 @@
 
 ### Description
 This is a R based model that helps to predict GDP. To run this model, you can choose either the downloaded version of R studio or webiste version of R. Make sure to download the dataset before running the model. 
+
 Here is the link to download R:                        https://www.rstudio.com/.  
 Here is the link to download data set:                 https://github.com/Tongasdfg/Tong-Public/blob/master/C3%20Worldbank.csv 
 Here is the link to download variable reference table: https://github.com/Tongasdfg/Tong-Public/blob/master/C3%20Worldbank-variable%20names.csv 
+
 ### Project Background
 After the world war II, some countries recovered quickly and gradually became development countries. However, there are still many developing countries today. We want to analyze the data and build a solid model to find which variables are correlated to boost the economy. We pick GDP, the most representative variable in the economy, as our Y variable. We assume that GDP are correlated to the natural resources, infrastructure, population and technology.  As a result, we pick agriculture, export, foreign investment, imports, industry, inflation rate, population, debt, fertility rate and computer as our x variables to start with. 
 
