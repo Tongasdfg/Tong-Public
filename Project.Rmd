@@ -1,0 +1,353 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Cmd+Shift+Enter*. 
+
+```{r}
+library(leaps)
+library(ggplot2)
+library(reshape2)
+library(dplyr)
+library(car)
+library(ResourceSelection)
+library(rms)
+```
+```{r}
+variable_code<- read.csv("~/Documents/ForthSemster/242/Final Project/C3 Worldbank-variable names.csv")
+worldbank<- read.csv("~/Documents/ForthSemster/242/Final Project/C3 Worldbank.csv")
+#worldbank_clean<-worldbank%>%
+#  filter(GDP!='*')
+worldbank_clean<-worldbank%>%
+  select(GDP,Agriculture,Exports.of.goods.and.services,Foreign.direct.investment,Imports.of.goods.and.services,Industry,Inflation,Population,Short.term.debt,Fertility.rate,Personal.computers)
+# rename
+#names(worldbank_clean)[1]="GDP"
+names(worldbank_clean)[3]="Export"
+names(worldbank_clean)[4]="ForeignInvestment"
+names(worldbank_clean)[5]="Import"
+names(worldbank_clean)[9]="Debt"
+names(worldbank_clean)[10]="FertilityRate"
+names(worldbank_clean)[11]="PersonalComputer"
+  
+worldbank_clean$GDP<-as.character(worldbank_clean$GDP)
+worldbank_clean$GDP<-as.numeric(worldbank_clean$GDP)
+
+worldbank_clean$Agriculture<-as.character(worldbank_clean$Agriculture)
+worldbank_clean$Agriculture<-as.numeric(worldbank_clean$Agriculture)
+
+worldbank_clean$Export<-as.character(worldbank_clean$Export)
+worldbank_clean$Export<-as.numeric(worldbank_clean$Export)
+
+worldbank_clean$ForeignInvestment<-as.character(worldbank_clean$ForeignInvestment)
+worldbank_clean$ForeignInvestment<-as.numeric(worldbank_clean$ForeignInvestment)
+
+worldbank_clean$Import<-as.character(worldbank_clean$Import)
+worldbank_clean$Import<-as.numeric(worldbank_clean$Import)
+
+worldbank_clean$Industry<-as.character(worldbank_clean$Industry)
+worldbank_clean$Industry<-as.numeric(worldbank_clean$Industry)
+
+worldbank_clean$Inflation<-as.character(worldbank_clean$Inflation)
+worldbank_clean$Inflation<-as.numeric(worldbank_clean$Inflation)
+
+worldbank_clean$Debt<-as.character(worldbank_clean$Debt)
+worldbank_clean$Debt<-as.numeric(worldbank_clean$Debt)
+
+worldbank_clean$FertilityRate<-as.character(worldbank_clean$FertilityRate)
+worldbank_clean$FertilityRate<-as.numeric(worldbank_clean$FertilityRate)
+
+worldbank_clean$PersonalComputer<-as.character(worldbank_clean$PersonalComputer)
+worldbank_clean$PersonalComputer<-as.numeric(worldbank_clean$PersonalComputer)
+worldbank_clean=na.omit(worldbank_clean)
+```
+```{r}
+best.subset<-regsubsets(GDP~.,worldbank_clean,nvmax=10)
+sum<-summary(best.subset)
+sum$outmat
+```
+```{r}
+reg<-lm(GDP~Debt,worldbank_clean)
+summary(reg)
+reg<-lm(GDP~Debt+Population,worldbank_clean)
+summary(reg)
+reg<-lm(GDP~Debt+Population+Agriculture,worldbank_clean)
+summary(reg)
+
+reg<-lm(GDP~Debt+Agriculture+Import+Population,worldbank_clean)
+summary(reg)
+worldbank_clean%>%
+  ggplot(aes(y=reg$res,x=Import))+
+  geom_point()+
+  labs(x="Import",y="Residuals",title="Residual Plot with Import")+
+  geom_smooth(method="lm")+
+  theme_classic()
+
+reg<-lm(GDP~Debt+Agriculture+Population+ForeignInvestment+Inflation,worldbank_clean)
+summary(reg)
+worldbank_clean%>%
+  ggplot(aes(y=reg$res,x=Inflation))+
+  geom_point()+
+  labs(x="Inflation",y="Residuals",title="Residual Plot with Inflation")+
+  geom_smooth(method="lm")+
+  theme_classic()
+
+reg<-lm(GDP~Debt+Agriculture+Population+ForeignInvestment+Inflation+Import,worldbank_clean)
+summary(reg)
+```
+
+
+
+
+```{r}
+newmodel<-worldbank_clean%>%
+  select(GDP,Debt,Population,Agriculture,ForeignInvestment,Inflation)
+reg<-lm(GDP~Debt+Population+Agriculture+ForeignInvestment+Inflation,newmodel)
+newmodel<-cbind(newmodel,reg$residuals,reg$fitted.values)
+names(newmodel)[7]<-c("res")
+names(newmodel)[8]<-c("fitted")
+```
+
+
+
+
+```{r}
+newmodel%>%
+  ggplot(aes(res))+
+  geom_histogram(color="dark blue",fill="blue",bins=15)+
+  labs(x="Residuals",title="Histogram of Residuals")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(fitted,res))+
+  geom_point()+
+  labs(x="Fitted Value",y="Residuals",title="Residual Plot with Fitted Value")+
+  geom_smooth(method="lm")+
+  theme_classic()
+shapiro.test(newmodel$res) 
+ncvTest(reg)
+qqnorm(newmodel$res)
+```
+```{r}
+newmodel%>%
+  ggplot(aes(Debt,res))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Residual plot with debt")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Population,res))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Residual plot with population")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Agriculture,res))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Residual plot with agriculture")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(ForeignInvestment,res))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Residual plot with ForeignInvestment")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Inflation,res))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="Residual plot with Inflation")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Debt,GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="GDP plot with debt")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Population,GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="GDP plot with population")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Agriculture,GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="GDP plot with agriculture")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(ForeignInvestment,GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="GDP plot with ForeignInvestment")+
+  theme_classic()
+
+newmodel%>%
+  ggplot(aes(Inflation,GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="GDP plot with Inflation")+
+  theme_classic()
+```
+```{r}
+# take the log of (Debt) and take the log of (population)
+test<-newmodel%>%
+  mutate(log_debt=log(Debt))%>%
+  mutate(log_population=log(Population))%>%
+  mutate(log_GDP=log(GDP))%>%
+  mutate(log_ForeignInvestment=log(ForeignInvestment))%>%
+  select(-ForeignInvestment)%>%
+  select(-Debt)%>%
+  select(-Population)%>%
+  select(-res)%>%
+  select(-fitted)%>%
+  select(-GDP)%>%
+  select(-Inflation)
+
+
+reg2<-lm(log_GDP~log_debt+log_population+Agriculture,test)
+summary(reg2)
+test<-cbind(test,reg2$residuals,reg2$fitted.values)
+names(test)[6]="res"
+names(test)[7]="fitted"
+
+test%>%
+  ggplot(aes(log_debt,log_GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="log GDP plot with log debt")+
+  theme_classic()
+
+test%>%
+  ggplot(aes(log_population,log_GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="log GDP plot with log population")+
+  theme_classic()
+
+test%>%
+  ggplot(aes(Agriculture,log_GDP))+
+  geom_point()+
+  geom_smooth(method="lm")+
+  labs(title="log GDP plot with Agriculture")+
+  theme_classic()
+
+```
+```{r}
+reg2<-lm(log_GDP~log_debt+log_population+Agriculture,test)
+summary(reg2)
+```
+```{r}
+test%>%
+  ggplot(aes(res))+
+  geom_histogram(color="dark blue",fill="blue",bins=5)+
+  labs(x="Residuals",title="Histogram of Residuals")+
+  theme_classic()
+
+test%>%
+  ggplot(aes(fitted,res))+
+  geom_point()+
+  labs(x="Fitted Value",y="Residuals",title="Residual Plot with Fitted Value")+
+  geom_smooth(method="lm")+
+  theme_classic()
+shapiro.test(test$res) 
+ncvTest(reg2)
+qqnorm(test$res)
+```
+
+## Concerns
+```{r}
+table<-test%>%
+  select(-res)%>%
+  select(-fitted)%>%
+  select(-log_GDP)%>%
+  select(-log_ForeignInvestment)
+pairs(table)
+cor(table)
+
+reg2<-lm(log_GDP~log_debt+log_population+Agriculture,test)
+newdata=data.frame(Agriculture=25,log_debt=20,log_population=15)
+predict(reg2,newdata,interval = "predict")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# without import
+```{r}
+test<-test%>%
+  select(-res)%>%
+  select(-fitted)
+reg3<-lm(log_GDP~log_debt+log_population+Agriculture,test)
+summary(reg3)
+test<-cbind(test,reg3$residuals,reg3$fitted.values)
+names(test)[6]="res"
+names(test)[7]="fitted"
+
+test%>%
+  ggplot(aes(res))+
+  geom_histogram(color="dark blue",fill="blue",bins=7)+
+  labs(x="Residuals",title="Histogram of Residuals")+
+  theme_classic()
+
+test%>%
+  ggplot(aes(fitted,res))+
+  geom_point()+
+  labs(x="Fitted Value",y="Residuals",title="Residual Plot with Fitted Value")+
+  geom_smooth(method="lm")+
+  theme_classic()
+shapiro.test(test$res) 
+ncvTest(reg3)
+```
+```{r}
+table2<-test%>%
+  select(-res)%>%
+  select(-fitted)%>%
+  select(-Import)%>%
+  select(-log_GDP)
+  
+cor(table2)
+```
+
